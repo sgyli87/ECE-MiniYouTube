@@ -1,0 +1,57 @@
+<project name="VodServer" basedir="." default="main">
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir" value="${build.dir}/jar"/>
+    <property name="main-class" value="VodServer"/>
+    <property name="lib.dir" value="lib"/>
+    
+	<path id="libPath">
+        <fileset dir="${lib.dir}" erroronmissingdir="false">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+	
+    <property name="classpath" refid="libPath"/>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="compile" depends="clean">
+        <mkdir dir="."/>
+        <javac srcdir="${src.dir}" destdir="." classpath="${classpath}"
+        includeantruntime="false">
+		</javac>
+    </target>
+	
+	<target name="unjar" depends="clean">
+		<unjar dest=".">
+			<fileset dir="${lib.dir}">
+				<include name="**/*.jar"/>
+			</fileset>
+			<patternset>
+				<exclude name="META-INF"/>
+				<exclude name="META-INF/MANIFEST.MF"/>
+			</patternset>
+		</unjar>
+	</target>
+	
+    <target name="jar" depends="compile,unjar">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="."
+		excludes="**/Thumbs.db">
+			<manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="jar">
+        <java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
+    </target>
+
+    <target name="clean-build" depends="clean,jar"/>
+    <target name="main" depends="clean,run"/>
+
+</project>
